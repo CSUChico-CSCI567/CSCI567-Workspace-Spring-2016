@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MoreUILecture4</string>
+    <string name="action_settings">Settings</string>
+    <string name="default_text">Default Text</string>
+    <string name="add_string">Add String</string>
+    <string name="submit">Submit</string>
+</resources>
