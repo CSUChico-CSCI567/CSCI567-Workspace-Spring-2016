@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SharedPreferencesLecture8</string>
+    <string name="preference_1">Preference 1</string>
+    <string name="preference_2">Preference 2</string>
+    <string name="set_your_preferences">Set your preferences:</string>
+    <string name="action_settings">Settings</string>
+    <string name="option2">Option 2</string>
+</resources>
