@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">RetroFitExampleL11</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="f2f_api_key">22bc1ea05b100779244d0e387f11499b</string>
+    <string name="loading">Loading, please wait</string>
+    <string name="loadcontent">Load Content</string>
+    <string name="food2fork">http://food2fork.com/api</string>
+    <string name="add_title_hint">Title</string>
+    <string name="add_rating_hint">Rating</string>
+    <string name="dialog_update_title">Update Item</string>
+    <string name="dialog_update_button">Update</string>
+    <string name="dialog_delete_button">Delete</string>
+    <string name="dialog_cancel_button">Cancel</string>
+
+</resources>
