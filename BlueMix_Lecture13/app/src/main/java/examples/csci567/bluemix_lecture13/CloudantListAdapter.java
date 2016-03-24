@@ -80,6 +80,10 @@ public class CloudantListAdapter extends RecyclerView.Adapter<CloudantListAdapte
         }
     }
 
+    public void removeAll(){
+        mData.clear();
+    }
+
     public ArrayList<CloudantItem> getData() {
         return mData;
     }

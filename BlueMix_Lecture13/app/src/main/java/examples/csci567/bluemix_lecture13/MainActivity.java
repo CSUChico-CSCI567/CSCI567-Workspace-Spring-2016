@@ -1,10 +1,12 @@
 package examples.csci567.bluemix_lecture13;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -22,6 +24,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.cloudant.sync.datastore.BasicDocumentRevision;
+import com.cloudant.sync.datastore.Datastore;
+import com.cloudant.sync.datastore.DatastoreManager;
+import com.cloudant.sync.datastore.DocumentBodyFactory;
+import com.cloudant.sync.datastore.DocumentRevision;
+import com.cloudant.sync.datastore.MutableDocumentRevision;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
@@ -31,8 +39,12 @@ import com.ibm.mobilefirstplatform.clientsdk.android.security.googleauthenticati
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,12 +69,7 @@ public class MainActivity extends AppCompatActivity {
             public void onRefresh() {
                 swipeRefreshLayout.setRefreshing(true);
                 if(mListAdapter!=null) {
-                    if(mListAdapter.getData().size()<=0) {
-                        //fetchData();
-                    }
-                    else{
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
+                    fetchData();
                 }
                 else{
                     swipeRefreshLayout.setRefreshing(false);
@@ -170,6 +177,33 @@ public class MainActivity extends AppCompatActivity {
                                 EditText categoryText = (EditText) dialog.getCustomView().findViewById(R.id.add_title);
                                 String text = categoryText.getText().toString();
                                 Toast.makeText(getApplicationContext(), "Add: " + text, Toast.LENGTH_SHORT).show();
+                                try{
+                                    // Create a DatastoreManager using application internal storage path
+                                    File path = getApplicationContext().getDir("datastores", Context.MODE_PRIVATE);
+                                    DatastoreManager manager = new DatastoreManager(path.getAbsolutePath());
+
+                                    Datastore ds = manager.openDatastore("my_datastore");
+
+                                    // Create a document
+
+                                    // Create a document
+                                    MutableDocumentRevision rev = new MutableDocumentRevision();
+
+
+                                    // Build up body content from a Map
+                                    Map<String, Object> json = new HashMap<String, Object>();
+                                    json.put("title", text);
+                                    rev.body = DocumentBodyFactory.create(json);
+
+                                    //Actually Create Document
+                                    DocumentRevision revision = ds.createDocumentFromRevision(rev);
+
+
+
+                                }
+                                catch (Exception e){
+                                    Log.e(TAG, e.toString());
+                                }
                             }
                         }
 
@@ -208,7 +242,52 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private class RefreshAdapter extends AsyncTask<Void, Void, Void> {
+        protected Void doInBackground(Void... datastores) {
+            try {
+                Log.d(TAG, "In Refresh Adapter");
+                // Create a DatastoreManager using application internal storage path
+                File path = getApplicationContext().getDir("datastores", Context.MODE_PRIVATE);
+                DatastoreManager manager = new DatastoreManager(path.getAbsolutePath());
+                Datastore ds = manager.openDatastore("my_datastore");
+                // read all documents in one go
+                int pageSize = ds.getDocumentCount();
+                List<BasicDocumentRevision> docs = ds.getAllDocuments(0, pageSize, true);
+                mListAdapter.removeAll();
+                for(int i=0;i<pageSize;i++){
+                    Log.d(TAG, docs.get(i).getBody().asMap().get("title").toString());
+                    Log.d(TAG, docs.get(i).getId());
+                    mListAdapter.addData(new CloudantItem(docs.get(i).getBody().asMap().get("title").toString()));
+                }
+                //Update UI?
+
+            }
+            catch (Exception e){
+                Log.e(TAG, e.toString());
+            }
+            return null;
+        }
+
+        protected void onProgressUpdate(Void... progress) {
+            //setProgressPercent(progress[0]);
+        }
+
+        protected void onPostExecute(Void result) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mListAdapter.notifyDataSetChanged();
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            });
+            //showDialog("Downloaded " + result + " bytes");
+        }
+    }
+
+
     private void fetchData() {
+        Log.d(TAG, "In Fetch Data");
+        new RefreshAdapter().execute();
     }
 
     private RecyclerView.Adapter getAdapter() {

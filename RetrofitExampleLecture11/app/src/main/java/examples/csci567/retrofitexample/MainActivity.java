@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         context = getBaseContext();
         page = 1;
 
+
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.attachToRecyclerView(mRecyclerView);
